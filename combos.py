@@ -7,6 +7,11 @@ parser.add_argument("-i", "--input", dest="wordlist", help="Input wordlist permu
 parser.add_argument("-d", "--depth", dest="depth", help="Permutation depth (max words to combine)", type=int, required=True)
 parser.add_argument("-o", "--output", dest="output", help="Output file", type=str, required=True)
 parser.add_argument("-c", "--charbetween", dest="between", help="Insert a character between each word", type=str, required=False)
+#the action="store_true" sets the value to a boolean "True" if the argument is present, do not specify a type
+parser.add_argument("-ex", "--exclude", dest="exclude", help="Exclude permutations/combos that have less words than the specified depth", action="store_true", required=False)
+
+#set the default value for "exclude" to false, unless the argument is specified
+parser.set_defaults(exclude=False)
 
 #get the arguments
 args = parser.parse_args()
@@ -35,19 +40,27 @@ def get_combos(lines, iters, prevlines=None):
 		if (prevlines is None):
 			for line in lines:
 				nextlines.append(line.strip() + "\n")
+				output.write(line.strip() + "\n")
 		else: #if this is one of the content-generating iterations, produce comboss
 			#first, add all of the previous combos to the list to maintain the combinations that were previously made
-			for prevline in prevlines:
-				combo = prevline.strip() + "\n"
-				nextlines.append(combo)
-				output.write(combo)
+			if (not args.exclude): #check to see if the user has not specified to exclude word depths below the number specified
+				for prevline in prevlines:
+					combo = prevline.strip() + "\n"
+					nextlines.append(combo)
 			#loop through the base wordlist content and combine it with the previous combinations of the words
 			#to produce a more complex combo
 			for line in lines:
 				for prevline in prevlines:
-					combo = line.strip() + args.between + prevline.strip() + "\n"
-					nextlines.append(combo)
-					output.write(combo)
+					#check for adding a character between the strings
+					if (not (args.between == None)):
+						combo = line.strip() + args.between + prevline.strip() + "\n"
+					else:
+						combo = line.strip() + prevline.strip() + "\n"
+
+					#make sure not to add a duplicate
+					if (combo not in nextlines):
+						output.write(combo)
+						nextlines.append(combo)
 
 		#let the user know that we have passed this depth
 		print("Depth Level:", (iterations - iters) + 1, "Completed...")
@@ -61,3 +74,5 @@ def get_combos(lines, iters, prevlines=None):
 		return prevlines
 
 combos = get_combos(wordlistlines, iterations)
+
+print(len(combos))
