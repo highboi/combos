@@ -37,7 +37,7 @@ def get_basic_combos(lines, iters, writefile=None, prevlines=None):
 		if (prevlines is None):
 			for line in lines:
 				nextlines.append(line.strip() + "\n")
-				if (writefile is not None):
+				if (writefile is not None and not args.exclude):
 					writefile.write(line.strip() + "\n")
 		else: #if this is one of the content-generating iterations, produce combos
 			#first, add all of the previous combos to the list to maintain the combinations that were previously made
@@ -58,7 +58,9 @@ def get_basic_combos(lines, iters, writefile=None, prevlines=None):
 					#make sure not to add a duplicate
 					if (combo not in nextlines):
 						nextlines.append(combo)
-						if (writefile is not None):
+						if (writefile is not None and not args.exclude):
+							writefile.write(combo)
+						elif (writefile is not None and args.exclude and iters == 1):
 							writefile.write(combo)
 
 		#let the user know that we have passed this depth
@@ -67,9 +69,11 @@ def get_basic_combos(lines, iters, writefile=None, prevlines=None):
 		#execute, or "return" the recursive function until we reach the base condition
 		return get_basic_combos(lines, iters-1, writefile, nextlines)
 	else: #the last depth level was passed
-		if (writefile is not None):
-			#tell the user that we wrote basic combos into the output file WITHOUT the expression
-			print("Wrote primitive combos into:", writefile.name, "(no expressions added yet)...")
+		#tell the user that we generated and/or wrote combos to the output file
+		if (args.expression is not None):
+			print("Primitive combos generated (no expressions added yet)...")
+		elif (writefile is not None and args.expression is None):
+			print("Wrote combos to \"" + writefile.name + "\"")
 		#return the complete list of the combos
 		return prevlines
 
