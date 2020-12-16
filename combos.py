@@ -206,6 +206,8 @@ def get_combos(lines, iters, writefile):
 		exps = get_expressions(basic_combos, args.expression)
 		#produce the final product of combos combined with expressions and write to the file
 		get_exp_combos(basic_combos, exps, writefile)
+	#close the output file properly
+	writefile.close()
 
 #the main function
 def main():
